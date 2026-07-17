@@ -442,31 +442,119 @@ body::before {
 .limit-toast {
   position: fixed;
   left: 50%;
-  top: 16px;
-  transform: translateX(-50%) translateY(-8px);
-  min-width: min(320px, calc(100vw - 24px));
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(255, 122, 162, 0.92), rgba(127, 225, 255, 0.9));
+  top: 18px;
+  transform: translateX(-50%) translateY(-20px);
+  min-width: min(340px, calc(100vw - 24px));
+  max-width: min(460px, calc(100vw - 24px));
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 122, 162, 0.98), rgba(127, 225, 255, 0.95));
   color: #07111f;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
-  font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+  font-weight: 900;
   text-align: center;
+  line-height: 1.6;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 40;
+  z-index: 30;
+  backdrop-filter: blur(6px);
 }
 
 .limit-toast.is-visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+  display: block;
+}
+
+.limit-toast.is-behind-panel {
+  z-index: 18;
 }
 
 .limit-toast.is-warning {
   border-color: rgba(252, 165, 165, 0.45);
-  background: rgba(80, 20, 30, 0.95);
+  background: linear-gradient(135deg, rgba(120, 20, 30, 0.98), rgba(255, 122, 162, 0.96));
+  color: #fff8f2;
+}
+
+.error-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 6, 16, 0.62);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.error-popup-backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.error-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.error-popup.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.error-popup__card {
+  width: min(420px, 100%);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 18px 18px 16px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 234, 240, 0.95));
+  color: #07111f;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+  border: 1px solid rgba(255, 122, 162, 0.3);
+}
+
+.error-popup__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex: none;
+  margin-top: 2px;
+}
+
+.error-popup__content {
+  flex: 1;
+}
+
+.error-popup__content h3 {
+  margin: 0 0 6px;
+  font-size: 1.04rem;
+}
+
+.error-popup__content p {
+  margin: 0;
+  line-height: 1.65;
+  font-weight: 600;
+}
+
+.error-popup__close {
+  border: 0;
+  background: transparent;
+  color: #07111f;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
 }
 
 .play-area {

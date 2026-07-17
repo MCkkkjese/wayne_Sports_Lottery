@@ -144,6 +144,17 @@
 			<span class="cart-fab__text">準備下單</span>
 		</button>
 		<div id="limit-toast" class="limit-toast" aria-live="polite"></div>
+		<div id="error-popup-backdrop" class="error-popup-backdrop" hidden></div>
+		<div id="error-popup" class="error-popup" role="alert" aria-live="assertive" hidden>
+			<div class="error-popup__card">
+				<div class="error-popup__icon">⚠️</div>
+				<div class="error-popup__content">
+					<h3>下單提醒</h3>
+					<p id="error-popup-message"></p>
+				</div>
+				<button id="error-popup-close" class="error-popup__close" type="button" aria-label="關閉提示">✕</button>
+			</div>
+		</div>
 		<div id="panel-backdrop" class="panel-backdrop" hidden></div>
 	</main>
 </body>

@@ -314,8 +314,14 @@ const orderPanel = document.querySelector('#order-section');
 const cartPanel = document.querySelector('#cart-dock');
 const backdropEl = document.querySelector('#panel-backdrop');
 const limitToastEl = document.querySelector('#limit-toast');
+const errorPopupEl = document.querySelector('#error-popup');
+const errorPopupBackdropEl = document.querySelector('#error-popup-backdrop');
+const errorPopupMessageEl = document.querySelector('#error-popup-message');
+const errorPopupCloseButton = document.querySelector('#error-popup-close');
 
 let toastTimeoutId = null;
+let errorPopupTimeoutId = null;
+let errorPopupVisible = false;
 
 function formatPoints(value) {
 	return `${value} 積分`;
@@ -346,17 +352,39 @@ function getOptionPoints(option) {
 	return option.times * POINTS_PER_UNIT;
 }
 
-function showLimitToast(message) {
-	if (!limitToastEl) {
+function hideErrorPopup() {
+	errorPopupVisible = false;
+	if (errorPopupEl) {
+		errorPopupEl.classList.remove('is-visible');
+		errorPopupEl.setAttribute('hidden', 'true');
+	}
+	if (errorPopupBackdropEl) {
+		errorPopupBackdropEl.classList.remove('is-visible');
+		errorPopupBackdropEl.setAttribute('hidden', 'true');
+	}
+}
+
+function showErrorPopup(message) {
+	if (!errorPopupEl || !errorPopupMessageEl) {
 		return;
 	}
 
-	limitToastEl.textContent = message;
-	limitToastEl.classList.add('is-visible');
-	clearTimeout(toastTimeoutId);
-	toastTimeoutId = window.setTimeout(() => {
-		limitToastEl.classList.remove('is-visible');
-	}, 2200);
+	errorPopupVisible = true;
+	errorPopupMessageEl.textContent = message;
+	errorPopupEl.classList.add('is-visible');
+	errorPopupEl.removeAttribute('hidden');
+	if (errorPopupBackdropEl) {
+		errorPopupBackdropEl.classList.add('is-visible');
+		errorPopupBackdropEl.removeAttribute('hidden');
+	}
+	clearTimeout(errorPopupTimeoutId);
+	errorPopupTimeoutId = window.setTimeout(() => {
+		hideErrorPopup();
+	}, 2800);
+}
+
+function showLimitToast(message, type = 'info') {
+	showErrorPopup(message);
 }
 
 function openPanel(panelName) {
@@ -377,6 +405,7 @@ function openPanel(panelName) {
 		backdropEl.classList.add('is-visible');
 		backdropEl.removeAttribute('hidden');
 	}
+	updateBetLimitToast();
 }
 
 function closePanels() {
@@ -392,6 +421,7 @@ function closePanels() {
 		backdropEl.classList.remove('is-visible');
 		backdropEl.setAttribute('hidden', 'true');
 	}
+	updateBetLimitToast();
 }
 
 function togglePanel(panelName) {
@@ -410,6 +440,14 @@ function updateBetLimitToast() {
 	if (!limitToastEl) {
 		return;
 	}
+
+	if (errorPopupVisible) {
+		limitToastEl.classList.remove('is-visible');
+		return;
+	}
+
+	const hasOpenPanel = Boolean(orderPanel?.classList.contains('is-open') || cartPanel?.classList.contains('is-open'));
+	limitToastEl.classList.toggle('is-behind-panel', hasOpenPanel);
 
 	if (!state.activeMatchId) {
 		limitToastEl.classList.remove('is-visible');
@@ -629,6 +667,7 @@ function setPendingSelection(payload) {
 	const repeatCount = Number(stakeInput.value || 1);
 	if (isMarketAlreadyInCart(payload.matchId, payload.marketId)) {
 		state.selectionNotice = '這個玩法已經在購物車中，請先移除該筆再重新選擇。';
+		showErrorPopup(state.selectionNotice);
 		renderPlayArea();
 		renderTicket();
 		return;
@@ -637,6 +676,7 @@ function setPendingSelection(payload) {
 		const existingSelection = state.pendingSelections[existingSelectionIndex];
 		if (existingSelection.optionLabel !== payload.label) {
 			state.selectionNotice = '同一個玩法只能選一個結果，請先移掉原本選項。';
+			showErrorPopup(state.selectionNotice);
 			renderPlayArea();
 			renderTicket();
 			return;
@@ -664,6 +704,7 @@ function setPendingSelection(payload) {
 	const nextPoints = getSelectionTotalPoints(nextSelections, repeatCount);
 	if (nextPoints > MAX_MATCH_POINTS) {
 		state.selectionNotice = `單筆最多 ${MAX_MATCH_POINTS} 積分，請減少倍數或刪掉部分玩法。`;
+		showErrorPopup(state.selectionNotice);
 		renderPlayArea();
 		renderTicket();
 		return;
@@ -737,7 +778,7 @@ function addPendingToCart() {
 	);
 	if (marketAlreadyInCart) {
 		state.selectionNotice = '同一場比賽內，該玩法已在購物車中，請先移除再重新加入。';
-		showLimitToast('同一個玩法只能加入購物車一次。');
+		showErrorPopup('同一個玩法只能加入購物車一次。');
 		renderTicket();
 		return;
 	}
@@ -745,7 +786,7 @@ function addPendingToCart() {
 	const matchUsage = getMatchBetUsage(state.activeMatchId);
 	if (matchUsage >= MAX_MATCH_BETS) {
 		state.selectionNotice = `這場比賽已達 ${MAX_MATCH_BETS} 次下注機會上限。`;
-		showLimitToast(`這場比賽已達 ${MAX_MATCH_BETS} 次下注機會上限，請切換到另一場比賽。`);
+		showErrorPopup(`這場比賽已達 ${MAX_MATCH_BETS} 次下注機會上限，請切換到另一場比賽。`);
 		renderTicket();
 		return;
 	}
@@ -754,6 +795,7 @@ function addPendingToCart() {
 	const totalPoints = getSelectionTotalPoints(state.pendingSelections, repeatCount);
 	if (totalPoints > MAX_MATCH_POINTS) {
 		state.selectionNotice = `單筆最多 ${MAX_MATCH_POINTS} 積分，請減少倍數或刪掉部分玩法。`;
+		showErrorPopup(state.selectionNotice);
 		renderTicket();
 		return;
 	}
@@ -790,7 +832,7 @@ function clearCart() {
 
 function submitOrder() {
 	if (!state.cartItems.length) {
-		showLimitToast('先選好玩法後，再按確定下單。');
+		showErrorPopup('先選好玩法後，再按確定下單。');
 		return;
 	}
 
@@ -800,7 +842,7 @@ function submitOrder() {
 		orderTime: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }),
 		items: state.cartItems,
 		totalPoints: totals.totalPoints,
-		note: '若預測中可得住獎勵，請呂紋鳳提供給陳威中做兌換。',
+		note: '若預測中，請提供給陳威中做兌換。',
 	};
 
 	const encoded = encodeURIComponent(JSON.stringify(orderPayload));
@@ -924,6 +966,14 @@ document.querySelectorAll('[data-close-panel]').forEach((button) => {
 	button.addEventListener('click', () => {
 		closePanels();
 	});
+});
+
+errorPopupCloseButton?.addEventListener('click', () => {
+	hideErrorPopup();
+});
+
+errorPopupBackdropEl?.addEventListener('click', () => {
+	hideErrorPopup();
 });
 
 stakeInput.addEventListener('input', renderTicket);
