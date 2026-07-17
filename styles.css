@@ -225,10 +225,6 @@ body::before {
   .floating-panel--order {
     bottom: auto;
   }
-
-  .floating-panel--cart {
-    top: auto;
-  }
 }
 
 .floating-panel__header {
