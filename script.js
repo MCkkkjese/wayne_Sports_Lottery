@@ -90,33 +90,13 @@ const marketGroups = [
 				],
 			},
 			{
-				id: 'double-chance',
-				title: '雙勝',
-				description: '一次包辦兩種賽果。',
-				buildOptions: (match) => [
-					{ label: `${match.home} 或 和局`, times: 1 },
-					{ label: `${match.home} 或 ${match.away}`, times: 1 },
-					{ label: `${match.away} 或 和局`, times: 1 },
-				],
-			},
-			{
-				id: 'half-result',
+			id: 'half-result',
 				title: '半場不讓分',
 				description: '只計上半場主勝、和局、客勝。',
 				buildOptions: (match) => [
 					{ label: `半場 ${match.home} 勝`, times: 2 },
 					{ label: '半場和局', times: 3 },
 					{ label: `半場 ${match.away} 勝`, times: 2 },
-				],
-			},
-			{
-				id: 'half-double-chance',
-				title: '半場雙勝',
-				description: '上半場包辦兩種賽果，三個選項分開下注。',
-				buildOptions: (match) => [
-					{ label: `${match.home} 或 和局`, times: 1 },
-					{ label: `${match.home} 或 ${match.away}`, times: 1 },
-					{ label: `${match.away} 或 和局`, times: 1 },
 				],
 			},
 			{
