@@ -210,6 +210,27 @@ body::before {
   width: min(480px, calc(100vw - 24px));
 }
 
+@media (max-width: 719px) {
+  .floating-panel {
+    left: 50%;
+    right: auto;
+    top: 50%;
+    transform: translate(-50%, 14px) scale(0.98);
+  }
+
+  .floating-panel.is-open {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .floating-panel--order {
+    bottom: auto;
+  }
+
+  .floating-panel--cart {
+    top: auto;
+  }
+}
+
 .floating-panel__header {
   display: flex;
   justify-content: space-between;

@@ -28,7 +28,7 @@ const rewardTiers = [
 			'清空購物車（上限 1500 元）',
 			'高級餐廳雙人饗宴',
 			'無條件答應一件事券',
-			'週末小旅行規劃券（兩天一夜）',
+			'出去玩出住宿一次',
 		],
 	},
 	{
@@ -63,7 +63,7 @@ const rewardTiers = [
 
 const POINTS_PER_UNIT = 100;
 const MAX_MATCH_POINTS = 1000;
-const MAX_MATCH_BETS = 3;
+const MAX_MATCH_BETS = 5;
 
 const marketGroups = [
 	{
@@ -71,7 +71,7 @@ const marketGroups = [
 		markets: [
 			{
 				id: 'full-result',
-				title: '全場不讓分 (1X2)',
+				title: '全場不讓分',
 				description: '預測全場主勝、客勝或和局。',
 				buildOptions: (match) => [
 					{ label: `${match.home} 勝`, times: 2 },
@@ -143,7 +143,7 @@ const marketGroups = [
 			{
 				id: 'over-under',
 				title: '大小',
-				description: '預測總進球數大於或小於盤口。',
+				description: '預測總進球數是否大於或小於 2.5 球。',
 				buildOptions: () => [
 					{ label: '大', times: 1 },
 					{ label: '小', times: 1 },
@@ -247,12 +247,11 @@ const marketGroups = [
 			},
 			{
 				id: 'first-goal',
-				title: '第一球 / 下一球 / 最後進球',
-				description: '預測哪一隊進指定的一球。',
+				title: '第一球',
+				description: '預測哪一隊會先取得進球。',
 				buildOptions: (match) => [
 					{ label: match.home, times: 2 },
 					{ label: match.away, times: 2 },
-					{ label: '無進球', times: 5 },
 				],
 			},
 			{
@@ -459,6 +458,20 @@ function getSelectionTotalPoints(selections, repeatCount = 1) {
 	return getSelectionTotalTimes(selections) * repeatCount * POINTS_PER_UNIT;
 }
 
+function getCartMatchMarketIds(matchId) {
+	const marketIds = new Set();
+	state.cartItems.forEach((item) => {
+		if (item.matchId === matchId) {
+			item.selections.forEach((selection) => marketIds.add(selection.marketId));
+		}
+	});
+	return marketIds;
+}
+
+function isMarketAlreadyInCart(matchId, marketId) {
+	return getCartMatchMarketIds(matchId).has(marketId);
+}
+
 function renderHeaderSelectors() {
 	if (!state.activeMatchId) {
 		return `
@@ -509,8 +522,9 @@ function renderHeaderSelectors() {
 
 function createOptionButton(match, market, option) {
 	const selectionKey = `${match.id}:${market.id}:${option.label}`;
+	const marketDisabled = isMarketAlreadyInCart(match.id, market.id);
 	const isSelected = state.pendingSelections.some((selection) => selection.key === selectionKey);
-	return `<button class="option-button ${isSelected ? 'is-selected' : ''}" type="button" data-selection-key="${selectionKey}" data-match-id="${match.id}" data-market-id="${market.id}" data-label="${option.label}" data-times="${option.times}">
+	return `<button class="option-button ${isSelected ? 'is-selected' : ''} ${marketDisabled ? 'is-disabled' : ''}" type="button" data-selection-key="${selectionKey}" data-match-id="${match.id}" data-market-id="${market.id}" data-label="${option.label}" data-times="${option.times}" ${marketDisabled ? 'disabled' : ''}>
 		<span>${option.label}</span>
 		<strong>+${getOptionPoints(option)} 積分</strong>
 	</button>`;
@@ -541,6 +555,7 @@ function renderMarkets() {
 			${markets
 				.map((market) => {
 					const options = market.buildOptions(match);
+					const marketUsed = isMarketAlreadyInCart(match.id, market.id);
 					return `
 						<section class="play-card market-card">
 							<div class="play-panel__title">
@@ -548,7 +563,8 @@ function renderMarkets() {
 								<span>${options.length} 個選項</span>
 							</div>
 							<p class="play-panel__description">${getMarketDescription(market, match)}</p>
-							<div class="option-grid">
+							${marketUsed ? '<div class="play-panel__note">此玩法已加入購物車，同一場比賽只能下注一次。</div>' : ''}
+							<div class="option-grid ${marketUsed ? 'is-locked' : ''}">
 								${options.map((option) => createOptionButton(match, market, option)).join('')}
 							</div>
 						</section>
@@ -595,7 +611,7 @@ function renderTicket() {
 
 	ticketList.innerHTML = `
 		<div class="ticket-note">這場比賽目前已用 ${matchUsage}/${MAX_MATCH_BETS} 次，還能再加 ${remainingBets} 次。</div>
-		<div class="ticket-note">同場比賽可以選多個玩法，但同一個玩法只能選一個結果。</div>
+		<div class="ticket-note">同場比賽可以選多個玩法，但同一個玩法只能選一個結果，且只能加入購物車一次。</div>
 		<div class="ticket-note ticket-note--info">這筆下注以 ${repeatCount} 倍計算，總共 ${comboPoints} 積分。</div>
 		${isAtMatchLimit ? `<div class="ticket-note ticket-note--warn">這場比賽已達 ${MAX_MATCH_BETS} 次下注上限，請切換到另一場比賽。</div>` : ''}
 		${isOverLimit ? '<div class="ticket-note ticket-note--warn">單筆最多 1000 積分，請減少倍數或刪掉部分玩法。</div>' : ''}
@@ -631,6 +647,12 @@ function setPendingSelection(payload) {
 	const market = markets.find((item) => item.id === payload.marketId);
 	const existingSelectionIndex = state.pendingSelections.findIndex((selection) => selection.marketId === payload.marketId);
 	const repeatCount = Number(stakeInput.value || 1);
+	if (isMarketAlreadyInCart(payload.matchId, payload.marketId)) {
+		state.selectionNotice = '這個玩法已經在購物車中，請先移除該筆再重新選擇。';
+		renderPlayArea();
+		renderTicket();
+		return;
+	}
 	if (existingSelectionIndex >= 0) {
 		const existingSelection = state.pendingSelections[existingSelectionIndex];
 		if (existingSelection.optionLabel !== payload.label) {
@@ -730,6 +752,16 @@ function addPendingToCart() {
 		return;
 	}
 
+	const marketAlreadyInCart = state.pendingSelections.some((selection) =>
+		state.cartItems.some((item) => item.matchId === state.activeMatchId && item.selections.some((cartSelection) => cartSelection.marketId === selection.marketId)),
+	);
+	if (marketAlreadyInCart) {
+		state.selectionNotice = '同一場比賽內，該玩法已在購物車中，請先移除再重新加入。';
+		showLimitToast('同一個玩法只能加入購物車一次。');
+		renderTicket();
+		return;
+	}
+
 	const matchUsage = getMatchBetUsage(state.activeMatchId);
 	if (matchUsage >= MAX_MATCH_BETS) {
 		state.selectionNotice = `這場比賽已達 ${MAX_MATCH_BETS} 次下注機會上限。`;
@@ -765,11 +797,15 @@ function addPendingToCart() {
 function removeCartItem(id) {
 	state.cartItems = state.cartItems.filter((item) => item.id !== id);
 	renderCart();
+	renderPlayArea();
+	renderTicket();
 }
 
 function clearCart() {
 	state.cartItems = [];
 	renderCart();
+	renderPlayArea();
+	renderTicket();
 }
 
 function submitOrder() {
