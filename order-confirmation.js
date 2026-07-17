@@ -15,10 +15,16 @@ if (!orderData || !container) {
       <div class="confirmation-item">
         <div class="confirmation-item__header">
           <strong>${item.matchName}</strong>
+          <span>${item.matchLabel ? `｜${item.matchLabel}` : ''}</span>
           <span>${item.selections.length} 個玩法</span>
         </div>
         <div class="confirmation-item__body">
-          ${item.selections.map((selection) => `<div>${selection.optionLabel}</div>`).join('')}
+          ${item.selections.map((selection) => `
+            <div class="confirmation-item__selection">
+              <div><strong>玩法：</strong>${selection.marketTitle}</div>
+              <div><strong>選項：</strong>${selection.optionLabel}</div>
+            </div>
+          `).join('')}
         </div>
         <div class="confirmation-item__meta">${formatPoints(item.totalPoints)}</div>
       </div>

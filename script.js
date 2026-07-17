@@ -714,6 +714,7 @@ function setPendingSelection(payload) {
 		key: payload.selectionKey,
 		matchId: payload.matchId,
 		matchName: match?.name ?? '',
+		matchLabel: match?.label ?? '',
 		marketId: payload.marketId,
 		marketTitle: market?.title ?? '',
 		optionLabel: payload.label,
@@ -754,9 +755,11 @@ function renderCart() {
 		.map((item) => `
 			<article class="cart-item">
 				<div>
-					<p class="cart-item__match">${item.matchName}</p>
+					<p class="cart-item__match">${item.matchName}｜${item.matchLabel || '比賽詳情'}</p>
 					<h3>這一場比賽的下注單</h3>
-					<p class="cart-item__option">${item.selections.map((selection) => selection.optionLabel).join('、')}</p>
+					<div class="cart-item__option">
+						${item.selections.map((selection) => `<div>玩法：${selection.marketTitle}｜選項：${selection.optionLabel}</div>`).join('')}
+					</div>
 				</div>
 				<div class="cart-item__meta">
 					<strong>${formatPoints(item.totalPoints)}</strong>
@@ -803,6 +806,7 @@ function addPendingToCart() {
 		id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
 		matchId: state.activeMatchId,
 		matchName: getMatchById(state.activeMatchId)?.name ?? '',
+		matchLabel: getMatchById(state.activeMatchId)?.label ?? '',
 		selections: state.pendingSelections.map((selection) => ({ ...selection })),
 		repeatCount,
 		totalPoints,
