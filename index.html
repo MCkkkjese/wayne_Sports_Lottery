@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>呂紋鳳專屬運彩網頁｜2026 FIFA 世界盃</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css">
+	<script defer src="script.js"></script>
+</head>
+<body>
+	<main class="app-shell">
+		<section class="hero card">
+			<div class="hero__eyebrow">2026 FIFA 世界盃</div>
+			<h1>呂紋鳳專屬運彩網頁</h1>
+			<p>作者：陳威中</p>
+		</section>
+
+		<div class="shop-layout">
+			<div class="shop-main">
+				<section class="rules card">
+					<div class="rules__header">
+						<div>
+							<p class="match__label">玩法說明</p>
+							<h2>下注流程</h2>
+						</div>
+					</div>
+					<div class="rules-grid">
+						<div class="rule-box">
+							<h3>先選好玩法</h3>
+							<p>先選一場比賽，再挑你想玩的玩法。</p>
+						</div>
+						<div class="rule-box">
+							<h3>點準備下單</h3>
+							<p>選好之後，點擊準備下單，畫面會跳到下單區塊。</p>
+						</div>
+						<div class="rule-box">
+							<h3>選下注倍數</h3>
+							<p>在下單區塊調整下注倍數，確認後加入購物車。</p>
+						</div>
+						<div class="rule-box">
+							<h3>完成下單</h3>
+							<p>所有下注都選完後，點確定下單，並把下單結果截圖給陳威中。</p>
+						</div>
+					</div>
+				</section>
+
+				<section class="guide card">
+					<div class="guide__title-row">
+						<div>
+							<p class="match__label">玩法導覽</p>
+							<h2>選擇玩法</h2>
+						</div>
+					</div>
+					<div id="play-area" class="play-area"></div>
+				</section>
+
+				<section class="ticket card" id="order-section">
+					<div class="ticket__header">
+						<div>
+							<p class="match__label">線單</p>
+							<h2>我的下注單</h2>
+						</div>
+						<div class="ticket__meta">先選玩法，再把它送進購物車</div>
+					</div>
+					<div class="ticket__controls">
+						<label class="stake-field">
+							<span>下注倍數</span>
+							<input id="stake-input" type="number" min="1" step="1" value="1">
+						</label>
+						<div class="ticket__summary">
+							<div>
+								<span>本筆累積</span>
+								<strong id="combo-times">0 積分</strong>
+							</div>
+							<div>
+								<span>準備加入</span>
+								<strong id="reward-status">尚未選玩法</strong>
+							</div>
+						</div>
+					</div>
+					<div id="ticket-list" class="ticket-list"></div>
+				</section>
+
+				<section class="rewards card">
+					<div class="guide__title-row">
+						<div>
+							<p class="match__label">獎勵池</p>
+							<h2>獎勵清單</h2>
+						</div>
+						<div class="guide__hint">積分越高，獎勵越大</div>
+					</div>
+					<div id="reward-highlight" class="reward-highlight"></div>
+					<div id="reward-catalog" class="reward-catalog"></div>
+				</section>
+
+			</div>
+
+			<aside class="cart-dock card" id="cart-dock">
+				<div class="cart-dock__header">
+					<div>
+						<p class="match__label">購物車</p>
+						<h2>下注購物車</h2>
+					</div>
+					<div class="cart-dock__count" id="cart-item-count">0 筆</div>
+				</div>
+				<div class="cart-dock__summary">
+					<div>
+							<span>購物車總積分</span>
+							<strong id="cart-total-times">0 積分</strong>
+					</div>
+					<div>
+						<span>獎勵解鎖</span>
+						<strong id="cart-reward-status">尚未開始</strong>
+					</div>
+				</div>
+				<div id="cart-list" class="cart-list"></div>
+				<button id="confirm-order" class="cart-add" type="button">確定下單</button>
+				<button id="cart-clear" class="cart-clear" type="button">清空購物車</button>
+			</aside>
+		</div>
+
+		<button id="cart-fab" class="cart-fab" type="button" aria-label="快速跳到購物車">
+			<span class="cart-fab__icon">🛒</span>
+			<span class="cart-fab__text">購物車</span>
+		</button>
+		<button id="order-fab" class="cart-fab cart-fab--order" type="button" aria-label="準備下單">
+			<span class="cart-fab__icon">⬇️</span>
+			<span class="cart-fab__text">準備下單</span>
+		</button>
+		<div id="limit-toast" class="limit-toast" aria-live="polite"></div>
+	</main>
+</body>
+</html>
